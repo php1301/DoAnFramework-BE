@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>aspnet-ChatLife-156FCF84-ECFD-4BCD-B3B2-48CB9EAAFE60</UserSecretsId>
+    <WebProject_DirectoryAccessLevelKey>0</WebProject_DirectoryAccessLevelKey>
+	 <GenerateRuntimeConfigurationFiles>True</GenerateRuntimeConfigurationFiles>
+	  <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.11" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.11">
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		  <!--<PrivateAssets>all</PrivateAssets>-->
+	  </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="5.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.9" />
+    <PackageReference Include="RestSharp" Version="106.12.0" />
+	  <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="5.0.2" />
+	  <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.2.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.2.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.2.2" />
+  </ItemGroup>
+	<ItemGroup>
+		<Folder Include="Resource\Avatar\" />
+		<Folder Include="Resource\Attachment\" />
+	</ItemGroup>
+</Project>
