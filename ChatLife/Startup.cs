@@ -14,6 +14,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ChatLife.Models;
 using ChatLife.Services;
+using ChatLife.Utils;
 using Pomelo.EntityFrameworkCore.MySql;
 namespace ChatLife
 {
@@ -62,11 +63,11 @@ namespace ChatLife
             {
                 c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "My API", Version = "v1" });
             });
-            /*       services.AddScoped<AuthService>();
-                   services.AddScoped<CallService>();
-                   services.AddScoped<ChatBoardService>();
-                   services.AddScoped<UserService>();*/
-        }
+            services.AddScoped<AuthService>();
+   /*         services.AddScoped<CallService>();
+            services.AddScoped<ChatBoardService>();*/
+/*            services.AddScoped<UserService>();
+*/        }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

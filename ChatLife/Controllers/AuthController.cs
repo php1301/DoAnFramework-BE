@@ -1,8 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using ChatLife.Dto;
+using ChatLife.Models;
+using ChatLife.Services;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -12,36 +18,33 @@ namespace ChatLife.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        // GET: api/<AuthController>
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
+        private AuthService _authService;
+        private IWebHostEnvironment _hostEnvironment;
+        private readonly IHttpContextAccessor _contextAccessor;
 
-        // GET api/<AuthController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        public AuthController(AuthService authService, IWebHostEnvironment hostEnvironment, IHttpContextAccessor contextAccessor)
         {
-            return "value";
+            this._authService = authService;
+            this._hostEnvironment = hostEnvironment;
+            this._contextAccessor = contextAccessor;
         }
-
-        // POST api/<AuthController>
+        [Route("auths/login")]
         [HttpPost]
-        public void Post([FromBody] string value)
+        public IActionResult Login(User user)
         {
+            ResponseAPI responseAPI = new ResponseAPI();
+            try
+            {
+                AccessToken accessToken = this._authService.Login(user);
+                responseAPI.Data = accessToken;
+                return Ok(responseAPI);
+            }
+            catch (Exception ex)
+            {
+                responseAPI.Message = ex.Message;
+                return BadRequest(responseAPI);
+            }
         }
 
-        // PUT api/<AuthController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<AuthController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
     }
 }
