@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -62,12 +64,31 @@ namespace ChatLife
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "My API", Version = "v1" });
+                c.AddSecurityDefinition("Bearer",
+                    new OpenApiSecurityScheme
+                    {
+                        Description = "JWT Authorization header using the Bearer scheme.",
+                        Type = SecuritySchemeType.Http,
+                        Scheme = "bearer"
+                    });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement{
+    {
+        new OpenApiSecurityScheme{
+            Reference = new OpenApiReference{
+                Id = "Bearer",
+                Type = ReferenceType.SecurityScheme
+            }
+        },new List<string>()
+    }
+});
             });
             services.AddScoped<AuthService>();
-   /*         services.AddScoped<CallService>();
-            services.AddScoped<ChatBoardService>();*/
-/*            services.AddScoped<UserService>();
-*/        }
+            /*            services.AddScoped<CallService>();
+            */
+            services.AddScoped<ChatService>();
+            services.AddScoped<UserService>();
+        }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
