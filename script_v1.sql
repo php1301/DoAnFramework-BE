@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `Call`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `Call` (
-  `Id` int NOT NULL,
+  `Id` int NOT NULL AUTO_INCREMENT,
   `GroupCallCode` varchar(32) NOT NULL,
   `UserCode` varchar(32) NOT NULL,
   `Url` varchar(500)  NOT NULL,
@@ -55,7 +55,7 @@ DROP TABLE IF EXISTS `Contact`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `Contact` (
-  `Id` bigint NOT NULL,
+  `Id` int NOT NULL AUTO_INCREMENT,
   `UserCode` varchar(32) NOT NULL,
   `ContactCode` varchar(32) NOT NULL,
   `Created` datetime(6) NOT NULL,
@@ -143,7 +143,7 @@ DROP TABLE IF EXISTS `GroupUser`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `GroupUser` (
-  `Id` bigint NOT NULL,
+  `Id` int NOT NULL AUTO_INCREMENT,
   `GroupCode` varchar(32) NOT NULL,
   `UserCode` varchar(32) NOT NULL,
   PRIMARY KEY (`Id`),
@@ -171,7 +171,7 @@ DROP TABLE IF EXISTS `Message`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `Message` (
-  `Id` bigint NOT NULL,
+  `Id` int NOT NULL AUTO_INCREMENT,
   `Type` varchar(10) NOT NULL COMMENT 'text\r\nmedia\r\nattachment',
   `GroupCode` varchar(32) NOT NULL,
   `Content` longtext ,
