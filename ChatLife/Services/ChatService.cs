@@ -339,6 +339,7 @@ namespace ChatLife.Services
                         Type = x.Type,
                         UserCreatedBy = new UserDto()
                         {
+                            FullName = x.UserCreatedBy.FullName,
                             Avatar = x.UserCreatedBy.Avatar
                         }
                     }).ToList();
