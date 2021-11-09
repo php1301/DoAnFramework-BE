@@ -39,7 +39,8 @@ namespace ChatLife.Services
                         Email = x.Email,
                         Gender = x.Gender,
                         Phone = x.Phone,
-                        Dob = x.Dob
+                        Dob = x.Dob,
+                        UserName = x.UserName,
                     }).FirstOrDefault();
         }
         /// <summary>
