@@ -15,6 +15,7 @@ namespace ChatLife.Dto
         public string CreatedBy { get; set; }
         public DateTime LastActive { get; set; }
 
+        public int Unread { get; set; }
         public List<UserDto> Users { get; set; }
 
         public MessageDto LastMessage { get; set; }

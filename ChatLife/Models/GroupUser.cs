@@ -12,7 +12,7 @@ namespace ChatLife.Models
         public long Id { get; set; }
         public string GroupCode { get; set; }
         public string UserCode { get; set; }
-
+        public int Unread { get; set; }
         public virtual Group Group { get; set; }
         public virtual User User { get; set; }
     }

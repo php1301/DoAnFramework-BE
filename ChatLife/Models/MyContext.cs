@@ -14,13 +14,17 @@ namespace ChatLife.Models
         public virtual DbSet<GroupCall> GroupCalls { get; set; }
         public virtual DbSet<GroupUser> GroupUsers { get; set; }
         public virtual DbSet<Message> Messages { get; set; }
+        public virtual DbSet<MessageSeen> MessageSeens { get; set; }
+
         public virtual DbSet<User> Users { get; set; }
 
+     
         public MyContext(DbContextOptions<MyContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-        }
+/*            modelBuilder.Entity<MessageSeen>().Property(t => t.Id).HasColumnName("Id");
+*/        }
     }
 }

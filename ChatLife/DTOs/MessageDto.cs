@@ -19,5 +19,6 @@ namespace ChatLife.Dto
         public string SendTo { get; set; }
         public UserDto UserCreatedBy { get; set; }
         public List<IFormFile> Attachments { get; set; }
+        public List<UserDto> SeenList { get; set; }
     }
 }
