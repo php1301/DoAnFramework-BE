@@ -185,8 +185,12 @@ CREATE TABLE `Message` (
   CONSTRAINT `FK_Message_User` FOREIGN KEY (`CreatedBy`) REFERENCES `User` (`Code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
+-- ALTER TABLE Message ADD SeenBy varchar(255)  DEFAULT NULL;
+-- ALTER TABLE Message
+--     ADD CONSTRAINT FK_Message_UserSeen
+--     FOREIGN KEY (SeenBy)
+--     REFERENCES User(Code);
+-- --
 -- Dumping data for table `Message`
 --
 
@@ -240,3 +244,20 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2021-10-20 22:27:19
+CREATE TABLE `MessageSeen` (
+  `Id` int NOT NULL AUTO_INCREMENT,
+  `MessageId` int NOT NULL,
+  `UserCode` varchar(32) NOT NULL,
+  `GroupCode` varchar(32) NOT NULL,
+  `Created` datetime(6) NOT NULL,
+  PRIMARY KEY (`Id`),
+  KEY `FK_MessageSeen_Message` (`MessageId`),
+  KEY `FK_MessageSeen_User` (`UserCode`),
+  KEY `FK_MessageSeen_Group` (`GroupCode`),
+  CONSTRAINT `FK_MessageSeen_Message` FOREIGN KEY (`MessageId`) REFERENCES `Message` (`Id`),
+  CONSTRAINT `FK_MessageSeen_User` FOREIGN KEY (`UserCode`) REFERENCES `User` (`Code`),
+  CONSTRAINT `FK_MessageSeen_Group` FOREIGN KEY (`GroupCode`) REFERENCES `Group` (`Code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE GroupUser ADD Unread int DEFAULT 0;
+Alter Table User ADD IsActive int default 1;
