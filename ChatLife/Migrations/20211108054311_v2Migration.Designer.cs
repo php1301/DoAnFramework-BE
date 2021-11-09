@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChatLife.Migrations
 {
     [DbContext(typeof(MyContext))]
-    [Migration("20211020141415_ChatLife-v1")]
-    partial class ChatLifev1
+    [Migration("20211108054311_v2Migration")]
+    partial class v2Migration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -171,6 +171,9 @@ namespace ChatLife.Migrations
                     b.Property<string>("Path")
                         .HasColumnType("longtext");
 
+                    b.Property<string>("SeenBy")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("Type")
                         .HasColumnType("longtext");
 
@@ -181,6 +184,33 @@ namespace ChatLife.Migrations
                     b.HasIndex("GroupCode");
 
                     b.ToTable("Message");
+                });
+
+            modelBuilder.Entity("ChatLife.Models.MessageSeen", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<long>("MessageCode")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("MessageId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("UserCode")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MessageId");
+
+                    b.HasIndex("UserCode");
+
+                    b.ToTable("MessageSeen");
                 });
 
             modelBuilder.Entity("ChatLife.Models.User", b =>
@@ -284,6 +314,21 @@ namespace ChatLife.Migrations
                     b.Navigation("Group");
 
                     b.Navigation("UserCreatedBy");
+                });
+
+            modelBuilder.Entity("ChatLife.Models.MessageSeen", b =>
+                {
+                    b.HasOne("ChatLife.Models.Message", "Message")
+                        .WithMany()
+                        .HasForeignKey("MessageId");
+
+                    b.HasOne("ChatLife.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserCode");
+
+                    b.Navigation("Message");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ChatLife.Models.Group", b =>
