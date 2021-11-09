@@ -49,11 +49,13 @@ namespace ChatLife.Services
                              Code = y.User.Code,
                              FullName = y.User.FullName,
                              Avatar = y.User.Avatar
-                         }).ToList()
+                         }).ToList(),
+                         Unread = x.GroupUsers.Where(y => y.UserCode == userSession).Select(y => y.Unread).FirstOrDefault()
                      }).ToList();
 
             foreach (var group in groups)
             {
+                var tempCode = group.Code;
                 //Nếu nhóm chat có type = SINGLE (chat 1-1) => đổi tên nhóm chat thành tên người chat cùng
                 if (group.Type == Constants.GroupType.SINGLE)
                 {
@@ -64,10 +66,11 @@ namespace ChatLife.Services
 
                 // Lấy tin nhắn gần nhất để hiển thị
                 group.LastMessage = this.context.Messages
-                    .Where(x => x.GroupCode.Equals(group.Code))
+                    .Where(x => x.GroupCode.Equals(tempCode))
                     .OrderByDescending(x => x.Created)
                     .Select(x => new MessageDto()
                     {
+                        Id = x.Id,
                         Created = x.Created,
                         CreatedBy = x.CreatedBy,
                         Content = x.Content,
@@ -94,20 +97,28 @@ namespace ChatLife.Services
             // nếu mã nhóm k tồn tại => thuộc loại chat 1-1 (Tự quy định) => Trả về thông tin người chat cùng
             if (group == null)
             {
+                string grpCode = this.context.Groups
+                    .Where(x => x.Type.Equals(Constants.GroupType.SINGLE))
+                    .Where(x => x.GroupUsers.Any(y => y.UserCode.Equals(userSession) &&
+                                x.GroupUsers.Any(y => y.UserCode.Equals(contactCode))))
+                    .Select(x => x.Code)
+                    .FirstOrDefault();
                 return this.context.Users
                         .Where(x => x.Code.Equals(contactCode))
                         .OrderBy(x => x.FullName)
                         .Select(x => new
                         {
                             IsGroup = false,
-                            Code = x.Code,
+                            Code = grpCode,
                             Address = x.Address,
                             Avatar = x.Avatar,
+                            UserCode = x.Code,
                             Dob = x.Dob,
                             Email = x.Email,
                             FullName = x.FullName,
                             Gender = x.Gender,
-                            Phone = x.Phone
+                            Phone = x.Phone,
+                            UserName = x.UserName,
                         })
                         .FirstOrDefault();
             }
@@ -123,14 +134,16 @@ namespace ChatLife.Services
                             .Select(x => new
                             {
                                 IsGroup = false,
-                                Code = x.Code,
+                                Code = groupCode,
                                 Address = x.Address,
                                 Avatar = x.Avatar,
+                                UserCode = x.Code,
                                 Dob = x.Dob,
                                 Email = x.Email,
                                 FullName = x.FullName,
                                 Gender = x.Gender,
-                                Phone = x.Phone
+                                Phone = x.Phone,
+                                UserName = x.UserName,
                             })
                              .FirstOrDefault();
                 }
@@ -215,7 +228,9 @@ namespace ChatLife.Services
             }
             return group;
         }
-
+        public void IsTyping(string username, string groupCode)
+        {
+        }
         /// <summary>
         /// Gửi tin nhắn
         /// </summary>
@@ -260,7 +275,8 @@ namespace ChatLife.Services
                             },
                             new GroupUser()
                             {
-                                UserCode = sendTo.Code
+                                UserCode = sendTo.Code,
+                                Unread = 1,
                             }
                         }
                 };
@@ -305,15 +321,59 @@ namespace ChatLife.Services
             };
 
             grp.LastActive = dateNow;
+            var updateUnread = grp.GroupUsers.Where(x => x.UserCode != userCode).ToList();
+            foreach (GroupUser gr in updateUnread)
+            {
+                gr.Unread = gr.Unread + 1;
+            };
 
             this.context.Messages.Add(msg);
             this.context.SaveChanges();
+
             try
             {
+                var success = new
+                {
+                    text = "sent",
+                    groupCode = grp.Code,
+                    lastMessage = msg.Id,
+                };
                 // Có thể tối ưu bằng cách chỉ gửi cho user trong nhóm chat
-                this.chatHub.Clients.All.SendAsync("messageHubListener", true);
+                this.chatHub.Clients.All.SendAsync("messageHubListener", success);
+                this.SeenMessage(msg.Id, userCode, groupCode);
             }
             catch (Exception ex) { }
+        }
+        public void SeenMessage(long messageId, string userCode, string groupCode)
+        {
+            var check = this.context.MessageSeens.Any(x => x.MessageId == messageId && x.UserCode == userCode);
+            if (!check)
+            {
+                DateTime dateNow = DateTime.Now;
+
+                MessageSeen msgSeen = new MessageSeen()
+                {
+                    MessageId = messageId,
+                    UserCode = userCode,
+                    GroupCode = groupCode,
+                    Created = dateNow,
+                };
+                this.context.MessageSeens.Add(msgSeen);
+                this.context.SaveChanges();
+            }
+            var messageSeens = this.context.MessageSeens.Where(x => x.MessageId == messageId).Select(x => new
+            {
+                FullName = x.User.FullName,
+                Avatar = x.User.Avatar,
+                Created = x.Created,
+            }).ToList();
+            var dataReturn = new
+            {
+                MessageId = messageId,
+                messageSeens = messageSeens,
+                type = "messageSeens"
+            };
+            this.chatHub.Clients.All.SendAsync("MessageSeen", dataReturn);
         }
 
         /// <summary>
@@ -324,25 +384,69 @@ namespace ChatLife.Services
         /// <returns>Danh sách tin nhắn</returns>
         public List<MessageDto> GetMessageByGroup(string userCode, string groupCode)
         {
-            return this.context.Messages
-                    .Where(x => x.GroupCode.Equals(groupCode))
-                    .Where(x => x.Group.GroupUsers.Any(y => y.UserCode.Equals(userCode)))
-                    .OrderBy(x => x.Created)
-                    .Select(x => new MessageDto()
+            var messages = this.context.Messages
+                   .Where(x => x.GroupCode.Equals(groupCode))
+                   .Where(x => x.Group.GroupUsers.Any(y => y.UserCode.Equals(userCode)))
+                   .OrderBy(x => x.Created)
+                   .Select(x => new MessageDto()
+                   {
+                       Created = x.Created,
+                       Content = x.Content,
+                       CreatedBy = x.CreatedBy,
+                       GroupCode = x.GroupCode,
+                       Id = x.Id,
+                       Path = x.Path,
+                       Type = x.Type,
+                       UserCreatedBy = new UserDto()
+                       {
+                           FullName = x.UserCreatedBy.FullName,
+                           Avatar = x.UserCreatedBy.Avatar
+                       }
+                   }).ToList();
+            try
+            {
+                var updateUnreadUser = this.context.GroupUsers.Where(x => x.GroupCode == groupCode && x.UserCode == userCode).FirstOrDefault();
+                if (updateUnreadUser != null)
+                {
+                    updateUnreadUser.Unread = 0;
+                    this.context.SaveChanges();
+                }
+                return messages;
+
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+            /*    var lastMessage = this.context.Messages
+                         .Where(x => x.Id.Equals(messages.LastOrDefault().Id)).Select(x => new MessageDto()
+                         {
+                             Created = x.Created,
+                             Content = x.Content,
+                             CreatedBy = x.CreatedBy,
+                             GroupCode = x.GroupCode,
+                             Id = x.Id,
+                             Path = x.Path,
+                             Type = x.Type,
+                             UserCreatedBy = new UserDto()
+                             {
+                                 FullName = x.UserCreatedBy.FullName,
+                                 Avatar = x.UserCreatedBy.Avatar
+                             }
+                         }).FirstOrDefault();
+                var seenList = this.context.Messages.Where(x => x.Id == lastMessage.Id).Select(x => new { Code = x.SeenBy }).ToList();
+                List<UserDto> seenListUserInfomartion = new List<UserDto>();
+                foreach(var u in seenList)
+                {
+                    var user = this.context.Users.Where(x => x.Code == u.Code).Select(x => new UserDto
                     {
-                        Created = x.Created,
-                        Content = x.Content,
-                        CreatedBy = x.CreatedBy,
-                        GroupCode = x.GroupCode,
-                        Id = x.Id,
-                        Path = x.Path,
-                        Type = x.Type,
-                        UserCreatedBy = new UserDto()
-                        {
-                            FullName = x.UserCreatedBy.FullName,
-                            Avatar = x.UserCreatedBy.Avatar
-                        }
-                    }).ToList();
+                        Avatar = x.Avatar,
+                        FullName = x.FullName,
+                        Code = x.Code,
+                    }).FirstOrDefault();
+                    seenListUserInfomartion.Add(user);
+                }
+                messages.FirstOrDefault(x => x.Id == lastMessage.Id).SeenList = seenListUserInfomartion;*/
         }
 
         /// <summary>
