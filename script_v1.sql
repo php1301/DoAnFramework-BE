@@ -261,3 +261,4 @@ CREATE TABLE `MessageSeen` (
 
 ALTER TABLE GroupUser ADD Unread int DEFAULT 0;
 Alter Table User ADD IsActive int default 1;
+ALTER TABLE `Message` ADD `IsRemoved` INT NOT NULL DEFAULT '1' AFTER `SeenBy`;
