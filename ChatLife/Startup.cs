@@ -84,8 +84,7 @@ namespace ChatLife
 });
             });
             services.AddScoped<AuthService>();
-            /*            services.AddScoped<CallService>();
-            */
+            services.AddScoped<CallService>();
             services.AddScoped<ChatService>();
             services.AddScoped<UserService>();
         }
