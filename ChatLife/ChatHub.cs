@@ -110,7 +110,14 @@ namespace ChatLife
                     updateUnreadUser.Unread = 0;
                     this.context.SaveChanges();
                 }
-                base.Clients.All.SendAsync("IsTyping", TypingList);
+                var usersInGroup = this.context.GroupUsers.Where(x => x.GroupCode == groupCode).ToList();
+                foreach (var us in usersInGroup)
+                {
+                    if (us.User.CurrentSession != null)
+                    {
+                        base.Clients.Client(us.User.CurrentSession).SendAsync("IsTyping", TypingList);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -140,7 +147,14 @@ namespace ChatLife
                     updateUnreadUser.Unread = 0;
                     this.context.SaveChanges();
                 }
-                base.Clients.All.SendAsync("IsTyping", TypingList);
+                var usersInGroup = this.context.GroupUsers.Where(x => x.GroupCode == groupCode).ToList();
+                foreach (var us in usersInGroup)
+                {
+                    if (us.User.CurrentSession != null)
+                    {
+                        base.Clients.Client(us.User.CurrentSession).SendAsync("IsTyping", TypingList);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -177,7 +191,14 @@ namespace ChatLife
                 messageSeens = messageSeens,
                 type = "messageSeens"
             };
-            base.Clients.All.SendAsync("MessageSeen", dataReturn);
+            var usersInGroup = this.context.GroupUsers.Where(x => x.GroupCode == groupCode).ToList();
+            foreach (var us in usersInGroup)
+            {
+                if (us.User.CurrentSession != null)
+                {
+                    base.Clients.Client(us.User.CurrentSession).SendAsync("MessageSeen", dataReturn);
+                }
+            }
         }
 
 
