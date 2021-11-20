@@ -94,6 +94,23 @@ namespace ChatLife.Controllers
                 return BadRequest(responseAPI);
             }
         }
+        [Route("remove-message")]
+        [HttpPost]
+        public IActionResult RemoveMessage([FromQuery] string groupCode, [FromQuery] int messageId)
+        {
+            ResponseAPI responseAPI = new ResponseAPI();
+            try
+            {
+                string userSession = SystemAuthorizationService.GetCurrentUser(this._contextAccessor);
+                this._chatBoardService.RemoveMessage(userSession, messageId, groupCode);
+                return Ok(responseAPI);
+            }
+            catch (Exception ex)
+            {
+                responseAPI.Message = ex.Message;
+                return BadRequest(responseAPI);
+            }
+        }
 
         [Route("send-message")]
         [HttpPost]
