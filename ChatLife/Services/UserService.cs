@@ -85,7 +85,7 @@ namespace ChatLife.Services
         public List<UserDto> GetContact(string userCode)
         {
             return this.context.Contacts
-                     .Where(x => x.UserCode.Equals(userCode) || x.ContactCode.Equals(userCode))
+                     .Where(x => x.UserCode.Equals(userCode))
                      .OrderBy(x => x.UserContact.FullName)
                      .Select(x => new UserDto()
                      {
@@ -153,8 +153,14 @@ namespace ChatLife.Services
                 ContactCode = user.Code,
                 Created = DateTime.Now
             };
+            Contact contact2 = new Contact()
+            {
+                UserCode = user.Code,
+                ContactCode = userCode,
+                Created = DateTime.Now
+            };
             context.Contacts.Add(contact);
-
+            context.Contacts.Add(contact2);
             context.SaveChanges();
         }
     }

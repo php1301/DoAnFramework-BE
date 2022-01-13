@@ -6,6 +6,9 @@
     <WebProject_DirectoryAccessLevelKey>0</WebProject_DirectoryAccessLevelKey>
 	 <GenerateRuntimeConfigurationFiles>True</GenerateRuntimeConfigurationFiles>
 	  <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+	  <ApplicationIcon />
+	  <OutputType>Exe</OutputType>
+	  <StartupObject />
   </PropertyGroup>
 
   <ItemGroup>

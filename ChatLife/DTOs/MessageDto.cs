@@ -15,6 +15,7 @@ namespace ChatLife.Dto
         public string Path { get; set; }
         public DateTime Created { get; set; }
         public string CreatedBy { get; set; }
+        public int isRemoved { get; set; }
 
         public string SendTo { get; set; }
         public UserDto UserCreatedBy { get; set; }

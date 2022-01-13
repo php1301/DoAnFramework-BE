@@ -18,6 +18,8 @@ namespace ChatLife.Models
         public DateTime Created { get; set; }
         public string CreatedBy { get; set; }
         public string SeenBy { get; set; }
+
+        public int isRemoved { get; set; }
         public virtual Group Group { get; set; }
         [ForeignKey("CreatedBy")]
         public virtual User UserCreatedBy { get; set; }

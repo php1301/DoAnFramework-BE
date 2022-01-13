@@ -75,7 +75,12 @@ namespace ChatLife.Services
                         CreatedBy = x.CreatedBy,
                         Content = x.Content,
                         GroupCode = x.GroupCode,
+                        isRemoved = x.isRemoved,
                         Type = x.Type,
+                        UserCreatedBy = new UserDto
+                        {
+                            FullName = x.UserCreatedBy.FullName
+                        }
                     }).FirstOrDefault();
             }
 
@@ -205,6 +210,35 @@ namespace ChatLife.Services
             this.context.SaveChanges();
         }
 
+
+        public void RemoveMessage(string userCode, int messageId, string groupCode)
+        {
+            try
+            {
+                var message = this.context.Messages.Where(x => x.Id == messageId).FirstOrDefault();
+                if (message.CreatedBy == userCode)
+                {
+                    message.isRemoved = 2;
+                    this.context.SaveChanges();
+                    var usersInGroup = this.context.GroupUsers.Where(x => x.GroupCode == groupCode).ToList();
+                    foreach (var us in usersInGroup)
+                    {
+                        var data = new
+                        {
+                            type = "sync"
+                        };
+                        if (us.User.CurrentSession != null)
+                        {
+                            this.chatHub.Clients.Client(us.User.CurrentSession).SendAsync("SyncSignal", data);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
         /// <summary>
         /// Cập nhật ảnh đại diện của nhóm chat
         /// </summary>
@@ -227,9 +261,6 @@ namespace ChatLife.Services
                 this.context.SaveChanges();
             }
             return group;
-        }
-        public void IsTyping(string username, string groupCode)
-        {
         }
         /// <summary>
         /// Gửi tin nhắn
@@ -259,6 +290,7 @@ namespace ChatLife.Services
             // Nếu nhóm vẫn không tồn tại => tạo nhóm chat mới có 2 thành viên
             if (grp == null)
             {
+                User userSent = this.context.Users.FirstOrDefault(x => x.Code.Equals(userCode));
                 User sendTo = this.context.Users.FirstOrDefault(x => x.Code.Equals(message.SendTo));
                 grp = new Group()
                 {
@@ -271,12 +303,14 @@ namespace ChatLife.Services
                         {
                             new GroupUser()
                             {
-                                UserCode = userCode
+                                UserCode = userCode,
+                                User = userSent
                             },
                             new GroupUser()
                             {
                                 UserCode = sendTo.Code,
                                 Unread = 1,
+                                User = sendTo
                             }
                         }
                 };
@@ -338,8 +372,14 @@ namespace ChatLife.Services
                     groupCode = grp.Code,
                     lastMessage = msg.Id,
                 };
-                // Có thể tối ưu bằng cách chỉ gửi cho user trong nhóm chat
-                this.chatHub.Clients.All.SendAsync("messageHubListener", success);
+                var usersInGroup = grp.GroupUsers.ToList();
+                foreach (var us in usersInGroup)
+                {
+                    if (us.User.CurrentSession != null)
+                    {
+                        this.chatHub.Clients.All.SendAsync("messageHubListener", success);
+                    }
+                }
                 this.SeenMessage(msg.Id, userCode, groupCode);
             }
             catch (Exception ex) { }
@@ -373,7 +413,15 @@ namespace ChatLife.Services
                 messageSeens = messageSeens,
                 type = "messageSeens"
             };
-            this.chatHub.Clients.All.SendAsync("MessageSeen", dataReturn);
+            var usersInGroup = this.context.GroupUsers.Where(x => x.GroupCode == groupCode).ToList();
+            foreach (var us in usersInGroup)
+            {
+                if (us.User.CurrentSession != null)
+                {
+                    this.chatHub.Clients.Client(us.User.CurrentSession).SendAsync("MessageSeen", dataReturn);
+                }
+            }
+
         }
 
         /// <summary>
@@ -397,6 +445,7 @@ namespace ChatLife.Services
                        Id = x.Id,
                        Path = x.Path,
                        Type = x.Type,
+                       isRemoved = x.isRemoved,
                        UserCreatedBy = new UserDto()
                        {
                            FullName = x.UserCreatedBy.FullName,
@@ -478,6 +527,7 @@ namespace ChatLife.Services
                         Id = x.Id,
                         Path = x.Path,
                         Type = x.Type,
+                        isRemoved = x.isRemoved,
                         UserCreatedBy = new UserDto()
                         {
                             Avatar = x.UserCreatedBy.Avatar
