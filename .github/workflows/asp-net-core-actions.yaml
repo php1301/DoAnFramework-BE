@@ -30,8 +30,8 @@ jobs:
           repository: php1301/doanframework-be
           context: ./ChatLife
           tags: |
-            phucpham1301/doanframework-be:v1
-            ghcr.io/php1301/doanframework-be:v1
+            phucpham1301/doanframework-be:v2
+            ghcr.io/php1301/doanframework-be:v2
           push: true
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
