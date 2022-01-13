@@ -2,9 +2,9 @@ name: Push Docker Image To DockerHub and Github Package
 
 on:
   push:
-    branches: [dev]
+    branches: [master]
   pull_request:
-    branches: [dev]
+    branches: [master]
 
 jobs:
   build:
