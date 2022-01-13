@@ -28,7 +28,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           repository: php1301/doanframework-be
-          context: .
+          context: ./ChatLife
           tags: |
             phucpham1301/doanframework-be:v1
             ghcr.io/php1301/doanframework-be:v1
